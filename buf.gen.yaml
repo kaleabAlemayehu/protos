@@ -1,0 +1,23 @@
+version: v2
+plugins:
+  - local: [go, tool, protoc-gen-go]
+    out: .
+    opt:
+      - paths=source_relative
+  - local: [go, tool, protoc-gen-connect-go]
+    out: .
+    opt:
+      - paths=source_relative
+      - simple
+  - local: [go, tool, protoc-gen-connect-openapi] 
+    out: .
+    opt: 
+      - format=json
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: medeb.local/proto 
+  disable:
+    - file_option: go_package
+      module: buf.build/bufbuild/protovalidate

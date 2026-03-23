@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package protos.v1;
+
+import "buf/validate/validate.proto";
+
+
+message RegisterRequest {
+  uint64 phone_number = 1 [
+  (buf.validate.field).uint64 = { gte: 100000000, lte: 999999999,}, 
+  (buf.validate.field).required = true];
+}
+
+message RegisterResponse {
+  bool success = 1;
+}
+
+
+service MedebService {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+}
