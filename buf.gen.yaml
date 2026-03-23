@@ -17,7 +17,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: medeb.local/proto 
+      value: github.com/kaleabAlemayehu/protos
   disable:
     - file_option: go_package
       module: buf.build/bufbuild/protovalidate
