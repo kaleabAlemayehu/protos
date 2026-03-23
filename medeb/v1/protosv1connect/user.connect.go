@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v1 "medeb.local/proto/medeb/v1"
+	v1 "github.com/kaleabAlemayehu/protos/medeb/v1"
 	http "net/http"
 	strings "strings"
 )

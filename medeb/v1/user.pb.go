@@ -120,8 +120,8 @@ const file_medeb_v1_user_proto_rawDesc = "" +
 	"\x10RegisterResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess2U\n" +
 	"\fMedebService\x12E\n" +
-	"\bRegister\x12\x1a.protos.v1.RegisterRequest\x1a\x1b.protos.v1.RegisterResponse\"\x00B\x84\x01\n" +
-	"\rcom.protos.v1B\tUserProtoP\x01Z#medeb.local/proto/medeb/v1;protosv1\xa2\x02\x03PXX\xaa\x02\tProtos.V1\xca\x02\tProtos\\V1\xe2\x02\x15Protos\\V1\\GPBMetadata\xea\x02\n" +
+	"\bRegister\x12\x1a.protos.v1.RegisterRequest\x1a\x1b.protos.v1.RegisterResponse\"\x00B\x94\x01\n" +
+	"\rcom.protos.v1B\tUserProtoP\x01Z3github.com/kaleabAlemayehu/protos/medeb/v1;protosv1\xa2\x02\x03PXX\xaa\x02\tProtos.V1\xca\x02\tProtos\\V1\xe2\x02\x15Protos\\V1\\GPBMetadata\xea\x02\n" +
 	"Protos::V1b\x06proto3"
 
 var (
