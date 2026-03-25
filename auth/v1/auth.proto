@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "buf/validate/validate.proto";
+
+
+message SendOTPRequest {
+  uint64 mobile_number = 1 [
+  (buf.validate.field).uint64 = { gte: 100000000, lte: 999999999,}, 
+  (buf.validate.field).required = true];
+}
+
+message SendOTPResponse {
+  bool success = 1;
+  string session_id = 2;
+}
+
+
+service AuthService {
+  rpc SendOTP(SendOTPRequest) returns (SendOTPResponse) {}
+}

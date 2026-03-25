@@ -1,16 +1,16 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "protos.v1"
+    "title": "auth.v1"
   },
   "paths": {
-    "/protos.v1.MedebService/Register": {
+    "/auth.v1.AuthService/SendOTP": {
       "post": {
         "tags": [
-          "protos.v1.MedebService"
+          "auth.v1.AuthService"
         ],
-        "summary": "Register",
-        "operationId": "protos.v1.MedebService.Register",
+        "summary": "SendOTP",
+        "operationId": "auth.v1.AuthService.SendOTP",
         "parameters": [
           {
             "name": "Connect-Protocol-Version",
@@ -32,7 +32,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/protos.v1.RegisterRequest"
+                "$ref": "#/components/schemas/auth.v1.SendOTPRequest"
               }
             }
           },
@@ -54,7 +54,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/protos.v1.RegisterResponse"
+                  "$ref": "#/components/schemas/auth.v1.SendOTPResponse"
                 }
               }
             }
@@ -65,6 +65,41 @@
   },
   "components": {
     "schemas": {
+      "auth.v1.SendOTPRequest": {
+        "type": "object",
+        "properties": {
+          "mobileNumber": {
+            "type": [
+              "integer",
+              "string"
+            ],
+            "title": "mobile_number",
+            "maximum": 999999999,
+            "minimum": 100000000,
+            "format": "int64"
+          }
+        },
+        "title": "SendOTPRequest",
+        "required": [
+          "mobileNumber"
+        ],
+        "additionalProperties": false
+      },
+      "auth.v1.SendOTPResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "success"
+          },
+          "sessionId": {
+            "type": "string",
+            "title": "session_id"
+          }
+        },
+        "title": "SendOTPResponse",
+        "additionalProperties": false
+      },
       "connect-protocol-version": {
         "type": "number",
         "title": "Connect-Protocol-Version",
@@ -153,44 +188,13 @@
         },
         "additionalProperties": true,
         "description": "Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details."
-      },
-      "protos.v1.RegisterRequest": {
-        "type": "object",
-        "properties": {
-          "phoneNumber": {
-            "type": [
-              "integer",
-              "string"
-            ],
-            "title": "phone_number",
-            "maximum": 999999999,
-            "minimum": 100000000,
-            "format": "int64"
-          }
-        },
-        "title": "RegisterRequest",
-        "required": [
-          "phoneNumber"
-        ],
-        "additionalProperties": false
-      },
-      "protos.v1.RegisterResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "title": "success"
-          }
-        },
-        "title": "RegisterResponse",
-        "additionalProperties": false
       }
     }
   },
   "security": [],
   "tags": [
     {
-      "name": "protos.v1.MedebService"
+      "name": "auth.v1.AuthService"
     }
   ]
 }
