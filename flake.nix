@@ -16,8 +16,6 @@
             buf
             gopls
             delve
-            postgresql_18
-            air
             # Other tools like git, make, etc.
           ];
 
