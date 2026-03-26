@@ -61,6 +61,64 @@
           }
         }
       }
+    },
+    "/auth.v1.AuthService/VerifyOTP": {
+      "post": {
+        "tags": [
+          "auth.v1.AuthService"
+        ],
+        "summary": "VerifyOTP",
+        "operationId": "auth.v1.AuthService.VerifyOTP",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auth.v1.VerifyOTPRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auth.v1.VerifyOTPResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -98,6 +156,43 @@
           }
         },
         "title": "SendOTPResponse",
+        "additionalProperties": false
+      },
+      "auth.v1.VerifyOTPRequest": {
+        "type": "object",
+        "properties": {
+          "otp": {
+            "type": [
+              "integer",
+              "string"
+            ],
+            "title": "otp",
+            "maximum": 999999,
+            "minimum": 100000,
+            "format": "int64"
+          },
+          "sessionId": {
+            "type": "string",
+            "title": "session_id",
+            "format": "uuid"
+          }
+        },
+        "title": "VerifyOTPRequest",
+        "required": [
+          "otp",
+          "sessionId"
+        ],
+        "additionalProperties": false
+      },
+      "auth.v1.VerifyOTPResponse": {
+        "type": "object",
+        "properties": {
+          "registrationToken": {
+            "type": "string",
+            "title": "registration_token"
+          }
+        },
+        "title": "VerifyOTPResponse",
         "additionalProperties": false
       },
       "connect-protocol-version": {

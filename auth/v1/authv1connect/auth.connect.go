@@ -35,11 +35,21 @@ const (
 const (
 	// AuthServiceSendOTPProcedure is the fully-qualified name of the AuthService's SendOTP RPC.
 	AuthServiceSendOTPProcedure = "/auth.v1.AuthService/SendOTP"
+	// AuthServiceVerifyOTPProcedure is the fully-qualified name of the AuthService's VerifyOTP RPC.
+	AuthServiceVerifyOTPProcedure = "/auth.v1.AuthService/VerifyOTP"
+)
+
+// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
+var (
+	authServiceServiceDescriptor         = v1.File_auth_v1_auth_proto.Services().ByName("AuthService")
+	authServiceSendOTPMethodDescriptor   = authServiceServiceDescriptor.Methods().ByName("SendOTP")
+	authServiceVerifyOTPMethodDescriptor = authServiceServiceDescriptor.Methods().ByName("VerifyOTP")
 )
 
 // AuthServiceClient is a client for the auth.v1.AuthService service.
 type AuthServiceClient interface {
-	SendOTP(context.Context, *v1.SendOTPRequest) (*v1.SendOTPResponse, error)
+	SendOTP(context.Context, *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error)
+	VerifyOTP(context.Context, *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error)
 }
 
 // NewAuthServiceClient constructs a client for the auth.v1.AuthService service. By default, it uses
@@ -51,12 +61,17 @@ type AuthServiceClient interface {
 // http://api.acme.com or https://acme.com/grpc).
 func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) AuthServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
-	authServiceMethods := v1.File_auth_v1_auth_proto.Services().ByName("AuthService").Methods()
 	return &authServiceClient{
 		sendOTP: connect.NewClient[v1.SendOTPRequest, v1.SendOTPResponse](
 			httpClient,
 			baseURL+AuthServiceSendOTPProcedure,
-			connect.WithSchema(authServiceMethods.ByName("SendOTP")),
+			connect.WithSchema(authServiceSendOTPMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		verifyOTP: connect.NewClient[v1.VerifyOTPRequest, v1.VerifyOTPResponse](
+			httpClient,
+			baseURL+AuthServiceVerifyOTPProcedure,
+			connect.WithSchema(authServiceVerifyOTPMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -64,21 +79,24 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 
 // authServiceClient implements AuthServiceClient.
 type authServiceClient struct {
-	sendOTP *connect.Client[v1.SendOTPRequest, v1.SendOTPResponse]
+	sendOTP   *connect.Client[v1.SendOTPRequest, v1.SendOTPResponse]
+	verifyOTP *connect.Client[v1.VerifyOTPRequest, v1.VerifyOTPResponse]
 }
 
 // SendOTP calls auth.v1.AuthService.SendOTP.
-func (c *authServiceClient) SendOTP(ctx context.Context, req *v1.SendOTPRequest) (*v1.SendOTPResponse, error) {
-	response, err := c.sendOTP.CallUnary(ctx, connect.NewRequest(req))
-	if response != nil {
-		return response.Msg, err
-	}
-	return nil, err
+func (c *authServiceClient) SendOTP(ctx context.Context, req *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error) {
+	return c.sendOTP.CallUnary(ctx, req)
+}
+
+// VerifyOTP calls auth.v1.AuthService.VerifyOTP.
+func (c *authServiceClient) VerifyOTP(ctx context.Context, req *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error) {
+	return c.verifyOTP.CallUnary(ctx, req)
 }
 
 // AuthServiceHandler is an implementation of the auth.v1.AuthService service.
 type AuthServiceHandler interface {
-	SendOTP(context.Context, *v1.SendOTPRequest) (*v1.SendOTPResponse, error)
+	SendOTP(context.Context, *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error)
+	VerifyOTP(context.Context, *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -87,17 +105,24 @@ type AuthServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
-	authServiceMethods := v1.File_auth_v1_auth_proto.Services().ByName("AuthService").Methods()
-	authServiceSendOTPHandler := connect.NewUnaryHandlerSimple(
+	authServiceSendOTPHandler := connect.NewUnaryHandler(
 		AuthServiceSendOTPProcedure,
 		svc.SendOTP,
-		connect.WithSchema(authServiceMethods.ByName("SendOTP")),
+		connect.WithSchema(authServiceSendOTPMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	authServiceVerifyOTPHandler := connect.NewUnaryHandler(
+		AuthServiceVerifyOTPProcedure,
+		svc.VerifyOTP,
+		connect.WithSchema(authServiceVerifyOTPMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	return "/auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceSendOTPProcedure:
 			authServiceSendOTPHandler.ServeHTTP(w, r)
+		case AuthServiceVerifyOTPProcedure:
+			authServiceVerifyOTPHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -107,6 +132,10 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 // UnimplementedAuthServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedAuthServiceHandler struct{}
 
-func (UnimplementedAuthServiceHandler) SendOTP(context.Context, *v1.SendOTPRequest) (*v1.SendOTPResponse, error) {
+func (UnimplementedAuthServiceHandler) SendOTP(context.Context, *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("auth.v1.AuthService.SendOTP is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) VerifyOTP(context.Context, *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("auth.v1.AuthService.VerifyOTP is not implemented"))
 }
