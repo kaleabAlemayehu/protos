@@ -4,6 +4,64 @@
     "title": "auth.v1"
   },
   "paths": {
+    "/auth.v1.AuthService/RegisterPIN": {
+      "post": {
+        "tags": [
+          "auth.v1.AuthService"
+        ],
+        "summary": "RegisterPIN",
+        "operationId": "auth.v1.AuthService.RegisterPIN",
+        "parameters": [
+          {
+            "name": "Connect-Protocol-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/connect-protocol-version"
+            }
+          },
+          {
+            "name": "Connect-Timeout-Ms",
+            "in": "header",
+            "schema": {
+              "$ref": "#/components/schemas/connect-timeout-header"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/auth.v1.RegisterPINRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/connect.error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/auth.v1.RegisterPINResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth.v1.AuthService/SendOTP": {
       "post": {
         "tags": [
@@ -123,6 +181,45 @@
   },
   "components": {
     "schemas": {
+      "auth.v1.RegisterPINRequest": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": [
+              "integer",
+              "string"
+            ],
+            "title": "pin",
+            "maximum": 999999,
+            "minimum": 100000,
+            "format": "int64"
+          }
+        },
+        "title": "RegisterPINRequest",
+        "required": [
+          "pin"
+        ],
+        "additionalProperties": false
+      },
+      "auth.v1.RegisterPINResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "status"
+          },
+          "accessToken": {
+            "type": "string",
+            "title": "access_token"
+          }
+        },
+        "title": "RegisterPINResponse",
+        "required": [
+          "status",
+          "accessToken"
+        ],
+        "additionalProperties": false
+      },
       "auth.v1.SendOTPRequest": {
         "type": "object",
         "properties": {
