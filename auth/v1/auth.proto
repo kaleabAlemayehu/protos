@@ -8,6 +8,20 @@ import "buf/validate/validate.proto";
 service AuthService {
   rpc SendOTP(SendOTPRequest) returns (SendOTPResponse) {}
   rpc VerifyOTP(VerifyOTPRequest) returns (VerifyOTPResponse){}
+  rpc RegisterPIN(RegisterPINRequest) returns(RegisterPINResponse){}
+}
+
+message RegisterPINRequest {
+  uint64 pin = 1 [
+  (buf.validate.field).uint64 = { gte: 100000, lte: 999999,}, 
+  (buf.validate.field).required = true];
+}
+
+message RegisterPINResponse {
+  string status = 1[
+  (buf.validate.field).required = true];
+  string access_token = 2 [
+  (buf.validate.field).required = true];
 }
 
 message SendOTPRequest {
