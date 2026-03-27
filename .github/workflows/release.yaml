@@ -15,34 +15,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Get all history so tags are visible
+          fetch-depth: 0
+
       - name: Setup Buf
         uses: bufbuild/buf-setup-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 1. Lint the Protobuf files
       - name: Buf Lint
         uses: bufbuild/buf-lint-action@v1
 
-      # 2. Generate the Go code
       - name: Clean and Generate
         run: |
-          find . -name "*.go" -type f -delete
+          find . -name "*.pb.go" -type f -delete
+          find . -name "*.connect.go" -type f -delete
           buf generate
 
-      # 3. Commit changes (if any generated code changed)
+      # STEP 1: Commit and Push the generated code first
       - name: Commit generated code
+        id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: generate protobuf code [skip ci]"
+          file_pattern: "**/*.go **/*.json"
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.26'
-          cache: true
+      # STEP 2: Make sure the runner is on the latest commit before tagging
+      - name: Pull latest changes
+        run: git pull origin main
 
+      # STEP 3: Tag the NEW commit created by the step above
       - name: Bump version and push tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
@@ -50,7 +51,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
 
-      # INFO: Force fetch the tag that was just created by the step above
       - name: Update local git tags
         run: git fetch --tags --force
 
