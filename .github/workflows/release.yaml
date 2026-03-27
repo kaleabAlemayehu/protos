@@ -56,9 +56,6 @@ jobs:
           default_bump: patch
           commit_sha: ${{ steps.auto_commit.outputs.commit_hash }}
 
-      - name: Update local git tags
-        run: git fetch --tags --force
-
       - name: Create a GitHub Release
         uses: ncipollo/release-action@v1
         with:
