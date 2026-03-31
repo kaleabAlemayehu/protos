@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package auth.v1;
 
+import "google/api/annotations.proto";
 import "buf/validate/validate.proto";
 
 
@@ -9,6 +10,24 @@ service AuthService {
   rpc SendOTP(SendOTPRequest) returns (SendOTPResponse) {}
   rpc VerifyOTP(VerifyOTPRequest) returns (VerifyOTPResponse){}
   rpc RegisterPIN(RegisterPINRequest) returns(RegisterPINResponse){}
+  rpc Unlock(UnlockRequest) returns(UnlockResponse){}
+}
+
+message UnlockRequest {
+  uint64 pin = 1 [
+  (buf.validate.field).uint64 = { gte: 100000, lte: 999999,}, 
+  (buf.validate.field).required = true];
+  string refresh_token = 2 [
+  (buf.validate.field).required = true];
+}
+
+message UnlockResponse{
+  string status = 1[
+  (buf.validate.field).required = true];
+  string access_token = 2 [
+  (buf.validate.field).required = true];
+  string refresh_token = 2 [
+  (buf.validate.field).required = true];
 }
 
 message RegisterPINRequest {
@@ -21,6 +40,8 @@ message RegisterPINResponse {
   string status = 1[
   (buf.validate.field).required = true];
   string access_token = 2 [
+  (buf.validate.field).required = true];
+  string refresh_token = 2 [
   (buf.validate.field).required = true];
 }
 

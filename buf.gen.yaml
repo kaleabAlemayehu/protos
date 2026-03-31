@@ -12,6 +12,7 @@ plugins:
     out: .
     opt:
       - format=json
+      - path=openapi.yaml
 managed:
   enabled: true
   override:
