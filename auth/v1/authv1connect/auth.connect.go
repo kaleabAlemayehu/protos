@@ -39,6 +39,8 @@ const (
 	AuthServiceVerifyOTPProcedure = "/auth.v1.AuthService/VerifyOTP"
 	// AuthServiceRegisterPINProcedure is the fully-qualified name of the AuthService's RegisterPIN RPC.
 	AuthServiceRegisterPINProcedure = "/auth.v1.AuthService/RegisterPIN"
+	// AuthServiceUnlockProcedure is the fully-qualified name of the AuthService's Unlock RPC.
+	AuthServiceUnlockProcedure = "/auth.v1.AuthService/Unlock"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -47,6 +49,7 @@ var (
 	authServiceSendOTPMethodDescriptor     = authServiceServiceDescriptor.Methods().ByName("SendOTP")
 	authServiceVerifyOTPMethodDescriptor   = authServiceServiceDescriptor.Methods().ByName("VerifyOTP")
 	authServiceRegisterPINMethodDescriptor = authServiceServiceDescriptor.Methods().ByName("RegisterPIN")
+	authServiceUnlockMethodDescriptor      = authServiceServiceDescriptor.Methods().ByName("Unlock")
 )
 
 // AuthServiceClient is a client for the auth.v1.AuthService service.
@@ -54,6 +57,7 @@ type AuthServiceClient interface {
 	SendOTP(context.Context, *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error)
 	VerifyOTP(context.Context, *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error)
 	RegisterPIN(context.Context, *connect.Request[v1.RegisterPINRequest]) (*connect.Response[v1.RegisterPINResponse], error)
+	Unlock(context.Context, *connect.Request[v1.UnlockRequest]) (*connect.Response[v1.UnlockResponse], error)
 }
 
 // NewAuthServiceClient constructs a client for the auth.v1.AuthService service. By default, it uses
@@ -84,6 +88,12 @@ func NewAuthServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(authServiceRegisterPINMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		unlock: connect.NewClient[v1.UnlockRequest, v1.UnlockResponse](
+			httpClient,
+			baseURL+AuthServiceUnlockProcedure,
+			connect.WithSchema(authServiceUnlockMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -92,6 +102,7 @@ type authServiceClient struct {
 	sendOTP     *connect.Client[v1.SendOTPRequest, v1.SendOTPResponse]
 	verifyOTP   *connect.Client[v1.VerifyOTPRequest, v1.VerifyOTPResponse]
 	registerPIN *connect.Client[v1.RegisterPINRequest, v1.RegisterPINResponse]
+	unlock      *connect.Client[v1.UnlockRequest, v1.UnlockResponse]
 }
 
 // SendOTP calls auth.v1.AuthService.SendOTP.
@@ -109,11 +120,17 @@ func (c *authServiceClient) RegisterPIN(ctx context.Context, req *connect.Reques
 	return c.registerPIN.CallUnary(ctx, req)
 }
 
+// Unlock calls auth.v1.AuthService.Unlock.
+func (c *authServiceClient) Unlock(ctx context.Context, req *connect.Request[v1.UnlockRequest]) (*connect.Response[v1.UnlockResponse], error) {
+	return c.unlock.CallUnary(ctx, req)
+}
+
 // AuthServiceHandler is an implementation of the auth.v1.AuthService service.
 type AuthServiceHandler interface {
 	SendOTP(context.Context, *connect.Request[v1.SendOTPRequest]) (*connect.Response[v1.SendOTPResponse], error)
 	VerifyOTP(context.Context, *connect.Request[v1.VerifyOTPRequest]) (*connect.Response[v1.VerifyOTPResponse], error)
 	RegisterPIN(context.Context, *connect.Request[v1.RegisterPINRequest]) (*connect.Response[v1.RegisterPINResponse], error)
+	Unlock(context.Context, *connect.Request[v1.UnlockRequest]) (*connect.Response[v1.UnlockResponse], error)
 }
 
 // NewAuthServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -140,6 +157,12 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(authServiceRegisterPINMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	authServiceUnlockHandler := connect.NewUnaryHandler(
+		AuthServiceUnlockProcedure,
+		svc.Unlock,
+		connect.WithSchema(authServiceUnlockMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/auth.v1.AuthService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case AuthServiceSendOTPProcedure:
@@ -148,6 +171,8 @@ func NewAuthServiceHandler(svc AuthServiceHandler, opts ...connect.HandlerOption
 			authServiceVerifyOTPHandler.ServeHTTP(w, r)
 		case AuthServiceRegisterPINProcedure:
 			authServiceRegisterPINHandler.ServeHTTP(w, r)
+		case AuthServiceUnlockProcedure:
+			authServiceUnlockHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -167,4 +192,8 @@ func (UnimplementedAuthServiceHandler) VerifyOTP(context.Context, *connect.Reque
 
 func (UnimplementedAuthServiceHandler) RegisterPIN(context.Context, *connect.Request[v1.RegisterPINRequest]) (*connect.Response[v1.RegisterPINResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("auth.v1.AuthService.RegisterPIN is not implemented"))
+}
+
+func (UnimplementedAuthServiceHandler) Unlock(context.Context, *connect.Request[v1.UnlockRequest]) (*connect.Response[v1.UnlockResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("auth.v1.AuthService.Unlock is not implemented"))
 }
